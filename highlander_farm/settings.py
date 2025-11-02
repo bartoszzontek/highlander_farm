@@ -1,5 +1,8 @@
+# highlander_farm/settings.py
+
 from pathlib import Path
 import os
+from datetime import timedelta # Importuj timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,19 +19,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    
     # Third party
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
-
+    'django_filters', # Upewnij się, że to jest (było z ETAP 1)
+    
     # Local apps
     'cows',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # CORS na górze
+    'corsheaders.middleware.CorsMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -84,18 +88,30 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS Settings
-CORS_ALLOW_ALL_ORIGINS = True  # Tylko dev! W produkcji ustaw konkretne domeny
+CORS_ALLOW_ALL_ORIGINS = True 
 CORS_ALLOW_CREDENTIALS = True
 
-# REST Framework
+# === ZMIANY W REST_FRAMEWORK ===
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        # Ustaw JWT jako domyślną metodę uwierzytelniania
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # Na razie bez auth
+        # Wymagaj bycia zalogowanym dla WSZYSTKICH endpointów domyślnie
+        'rest_framework.permissions.IsAuthenticated', 
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 50,
+}
+
+# === NOWA KONFIGURACJA SIMPLEJWT ===
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60), # Token ważny 1h
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),    # Odświeżenie tokena ważne 7 dni
+    
+    "AUTH_HEADER_TYPES": ("Bearer",), # Oczekujemy nagłówka: "Bearer <token>"
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
 }

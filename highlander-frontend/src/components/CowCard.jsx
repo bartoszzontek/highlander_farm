@@ -1,14 +1,15 @@
 // src/components/CowCard.jsx
-import { Calendar, Tag, Edit2, Trash2, PlusCircle } from 'lucide-react';
+import { Calendar, Tag, Edit2, Trash2, PlusCircle, CloudOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { useNavigate } from 'react-router-dom'; // <-- IMPORTUJ useNavigate
+import { useNavigate } from 'react-router-dom';
+import { cn } from '../lib/utils'; // Importujemy cn
 
-// Dodajemy nowe propsy: onEdit, onDelete, onAddEvent
-export function CowCard({ cow, onEdit, onDelete, onAddEvent, onClick }) {
+// Dodajemy nowy prop: isOffline
+export function CowCard({ cow, onEdit, onDelete, onAddEvent, onClick, isOffline }) {
   
-  const navigate = useNavigate(); // <-- Użyj hooka nawigacji
+  const navigate = useNavigate(); 
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Brak danych';
@@ -22,9 +23,8 @@ export function CowCard({ cow, onEdit, onDelete, onAddEvent, onClick }) {
     return 'lat';
   };
 
-  // Zapobiega kliknięciu "karty" gdy klikamy na przycisk
   const handleActionClick = (e, actionFn) => {
-    e.stopPropagation(); // Kluczowe!
+    e.stopPropagation(); 
     if (actionFn) {
       actionFn(cow);
     } else {
@@ -32,13 +32,15 @@ export function CowCard({ cow, onEdit, onDelete, onAddEvent, onClick }) {
     }
   };
 
-  // Kliknięcie głównej karty
   const handleCardClick = () => {
-    // Jeśli przekazano własny 'onClick', użyj go (jak w starym skanerze)
     if (onClick) {
       onClick(cow);
     } else {
-      // Domyślna akcja: nawiguj do strony szczegółów
+      // Nie nawiguj do szczegółów, jeśli krowa jest offline (bo nie ma realnego ID)
+      if (isOffline) {
+        console.log("Krowa czeka na synchronizację, szczegóły niedostępne.");
+        return; 
+      }
       navigate(`/cow/${cow.id}`); 
     }
   };
@@ -46,23 +48,35 @@ export function CowCard({ cow, onEdit, onDelete, onAddEvent, onClick }) {
   return (
     <Card
       onClick={handleCardClick}
-      className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white/90 backdrop-blur-sm border-2 border-emerald-100 hover:border-emerald-300 cursor-pointer"
+      className={cn(
+        "hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white/90 backdrop-blur-sm border-2",
+        isOffline ? "border-dashed border-yellow-400 opacity-80" : "border-emerald-100 hover:border-emerald-300",
+        !isOffline && "cursor-pointer" // Kursor tylko jeśli można kliknąć
+      )}
     >
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between">
           <span className="text-xl font-bold text-gray-800 truncate">
             {cow.name}
           </span>
-          <Badge
-            variant={cow.gender === 'F' ? 'default' : 'secondary'}
-            className="ml-2"
-          >
-            {cow.gender === 'F' ? '♀' : '♂'}
-          </Badge>
+          {/* Wskaźnik Offline */}
+          {isOffline ? (
+            <Badge variant="outline" className="ml-2 border-yellow-500 text-yellow-600">
+              <CloudOff className="w-4 h-4 mr-1" />
+              Offline
+            </Badge>
+          ) : (
+            <Badge
+              variant={cow.gender === 'F' ? 'default' : 'secondary'}
+              className="ml-2"
+            >
+              {cow.gender === 'F' ? '♀' : '♂'}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Zdjęcie */}
+        {/* Zdjęcie (dla offline będzie placeholder) */}
         {cow.photo ? (
           <div className="w-full h-48 rounded-lg overflow-hidden bg-gray-100">
             <img
@@ -77,7 +91,6 @@ export function CowCard({ cow, onEdit, onDelete, onAddEvent, onClick }) {
           </div>
         )}
 
-        {/* Informacje */}
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2 text-gray-700">
             <Tag className="w-4 h-4 text-emerald-600" />
@@ -102,7 +115,7 @@ export function CowCard({ cow, onEdit, onDelete, onAddEvent, onClick }) {
           </div>
         </div>
 
-        {/* --- PRZYCISKI AKCJI --- */}
+        {/* Przyciski Akcji */}
         <div className="flex gap-2 pt-3">
           {onAddEvent && (
             <Button
@@ -110,6 +123,7 @@ export function CowCard({ cow, onEdit, onDelete, onAddEvent, onClick }) {
               variant="default"
               className="flex-1 bg-blue-600 hover:bg-blue-700"
               onClick={(e) => handleActionClick(e, onAddEvent)}
+              disabled={isOffline} // Wyłącz dodawanie zdarzeń dla krowy offline
             >
               <PlusCircle className="w-4 h-4 mr-2" />
               Zdarzenie

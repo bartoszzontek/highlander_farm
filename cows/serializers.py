@@ -1,10 +1,9 @@
 # cows/serializers.py
 
 from rest_framework import serializers
-from .models import Cow, Event # Importuj Event
+from .models import Cow, Event 
 
 class CowSerializer(serializers.ModelSerializer):
-    """Serializer do odczytu (GET) - z obliczonym wiekiem i pełnym URL zdjęcia"""
     age = serializers.SerializerMethodField()
     photo = serializers.SerializerMethodField() 
 
@@ -28,8 +27,6 @@ class CowSerializer(serializers.ModelSerializer):
         return None
 
 class CowCreateUpdateSerializer(serializers.ModelSerializer):
-    """Serializer do tworzenia/aktualizacji (POST/PUT/PATCH)"""
-    
     class Meta:
         model = Cow
         fields = ['id', 'tag_id', 'name', 'breed', 'birth_date', 'gender', 'photo']
@@ -41,7 +38,6 @@ class CowCreateUpdateSerializer(serializers.ModelSerializer):
         instance = getattr(self, 'instance', None)
         if instance and instance.tag_id == value:
             return value
-                
         if Cow.objects.filter(tag_id=value).exists():
             raise serializers.ValidationError(f"Krowa z tag_id '{value}' już istnieje")
         return value
@@ -53,7 +49,6 @@ class CowCreateUpdateSerializer(serializers.ModelSerializer):
         return value
 
 class CowListSerializer(serializers.ModelSerializer): 
-    """Serializer dla listy (uproszczony)"""
     age = serializers.SerializerMethodField()
     photo = serializers.SerializerMethodField()
 
@@ -75,24 +70,26 @@ class CowListSerializer(serializers.ModelSerializer):
             return obj.photo.url
         return None
 
-# === NOWY SERIALIZER ===
+# === ZMIANA W EVENT SERIALIZER ===
 class EventSerializer(serializers.ModelSerializer):
     """Serializer dla zdarzeń"""
     
-    # Wyświetlamy nazwę użytkownika, jeśli istnieje
+    # Zmieniamy na ReadOnlyField, będzie pobierane z requestu
     user = serializers.StringRelatedField(read_only=True)
     
-    # Przekazujemy 'cow' jako ID przy tworzeniu
     cow = serializers.PrimaryKeyRelatedField(queryset=Cow.objects.all())
 
     class Meta:
         model = Event
         fields = ['id', 'cow', 'event_type', 'date', 'notes', 'user', 'created_at']
-        read_only_fields = ['user', 'created_at'] # User będzie ustawiany automatycznie
+        # 'user' jest teraz read_only, bo ustawiamy go w logice
+        read_only_fields = ['user', 'created_at'] 
 
     def create(self, validated_data):
-        # TODO: Ustaw usera na podstawie requestu, gdy będzie logowanie
-        # request = self.context.get('request')
-        # if request and hasattr(request, 'user'):
-        #     validated_data['user'] = request.user
+        # Pobierz użytkownika z kontekstu requestu
+        request = self.context.get('request')
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            # Automatycznie przypisz zalogowanego użytkownika
+            validated_data['user'] = request.user
+        
         return super().create(validated_data)
