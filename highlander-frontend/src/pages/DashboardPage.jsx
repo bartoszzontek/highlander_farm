@@ -6,7 +6,7 @@ import { Loader2, AlertCircle, Users, BarChart3, PieChart, CalendarCheck } from 
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { ResponsiveContainer, PieChart as RePieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { TaskList } from '../components/TaskList'; // <-- ZMIANA
+import { TaskList } from '../components/TaskList'; 
 import { toast } from 'sonner';
 
 // ... (StatCard, GenderChart, AgeHistogram - bez zmian) ...
@@ -58,7 +58,6 @@ function AgeHistogram({ data }) {
   );
 }
 
-
 export function DashboardPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
@@ -70,8 +69,8 @@ export function DashboardPage() {
       setLoading(true);
       const data = await networkApi.getStats();
       setStats(data);
-      // Synchronizuj zadania w tle
-      repository.syncTasks();
+      // === POPRAWKA: Używamy poprawnej nazwy funkcji ===
+      repository.syncTasks(); 
       repository.syncCows();
     } catch (err) {
       setError(err.message);
@@ -133,7 +132,6 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      {/* === ZMIANA: Używamy TaskList === */}
       <Card>
         <CardHeader>
           <CardTitle>Nadchodzące zadania (7 dni)</CardTitle>
@@ -142,10 +140,9 @@ export function DashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Przekazujemy 'tasks' i mapujemy pola, aby pasowały */}
           <TaskList 
             tasks={stats.upcoming_events} 
-            onTaskUpdated={fetchStats} // Odśwież statystyki po zmianie
+            onTaskUpdated={fetchStats} 
             showCowName={true}
           />
         </CardContent>

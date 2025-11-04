@@ -3,6 +3,7 @@ import Dexie from 'dexie';
 
 export const db = new Dexie('HighlanderFarmDB');
 
+// Poprzednie wersje (skumulowane)
 db.version(1).stores({
   cows: '&id, tag_id, name, breed', 
   events: '&id, date, cow, event_type',
@@ -22,8 +23,20 @@ db.version(5).stores({
 db.version(6).stores({
   tasks: '&id, due_date, is_completed, cow',
 });
+db.version(7).stores({
+  documents: '&id, cow',
+});
 
 // === NOWA WERSJA BAZY DANYCH ===
-db.version(7).stores({
-  documents: '&id, cow', // Indeksujemy po 'cow' (ID krowy)
+// Wersja 8 dodaje tabelę 'herds' i aktualizuje 'cows' o wszystkie nowe pola
+db.version(8).stores({
+  herds: '&id, name', // Nowa tabela Stada
+  
+  // Aktualizujemy definicję 'cows' o nowe indeksy
+  cows: '&id, tag_id, name, status, herd, dam, sire, passport_number', 
+  
+  events: '&id, date, cow, event_type',
+  tasks: '&id, due_date, is_completed, cow',
+  documents: '&id, cow',
+  syncQueue: '++id, action, entityId, tempId, payload.cow', 
 });

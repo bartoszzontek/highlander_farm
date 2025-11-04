@@ -3,7 +3,6 @@ from django.db import models
 from django.conf import settings
 import os
 
-# === MODEL: STADO ===
 class Herd(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name="Nazwa stada")
     description = models.TextField(blank=True, null=True, verbose_name="Opis")
@@ -16,14 +15,13 @@ class Herd(models.Model):
     def __str__(self):
         return self.name
 
-# === GŁÓWNY MODEL: KROWA (ZE WSZYSTKIMI POLAMI Z EXCELA) ===
 class Cow(models.Model):
     GENDER_CHOICES = [ ('M', 'Samiec'), ('F', 'Samica'), ]
     STATUS_CHOICES = [ 
         ('ACTIVE', 'Aktywna'), 
         ('SOLD', 'Sprzedana'), 
         ('ARCHIVED', 'Zarchiwizowana'),
-        ('OTHER', 'Inny') # Dodano na wszelki wypadek
+        ('OTHER', 'Inny')
     ]
     
     # --- Identyfikacja i Stado ---
@@ -75,8 +73,6 @@ class Cow(models.Model):
     
     def __str__(self):
         return f"{self.tag_id} - {self.name}"
-
-# === POZOSTAŁE MODELE (BEZ ZMIAN) ===
 
 class Event(models.Model):
     EVENT_TYPE_CHOICES = [
