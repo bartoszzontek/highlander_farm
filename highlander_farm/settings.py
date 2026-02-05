@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-your-secret-key-change-in-production'
 
 # DEBUG ustawiony na False w produkcji
-DEBUG = False
+DEBUG = True
 
 # Konfiguracja hostów - '*' rozwiązuje problem Bad Request (400) przy tunelach
 ALLOWED_HOSTS = ['*']
@@ -107,7 +107,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "https://highlander.zipit.pl",
     "https://higlander.zipit.pl",
+    "http://localhost:5173",  # Dodaj to dla Vite
+    "http://127.0.0.1:5173", # Dodaj to dla Vite
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 
 # === REST_FRAMEWORK ===

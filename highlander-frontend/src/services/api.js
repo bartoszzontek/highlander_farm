@@ -4,7 +4,9 @@ import { authService } from './auth';
 import { toast } from 'sonner';
 
 // Zmieniono na ścieżkę relatywną, aby zapytania trafiały do Nginxa na tym samym adresie
-const API_BASE_URL = '/api';
+// src/services/api.js
+
+ const API_BASE_URL = '/api';
 
 const authedFetch = async (url, options = {}) => {
   const token = authService.getAccessToken();
