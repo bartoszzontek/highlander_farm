@@ -2,15 +2,22 @@
 
 from pathlib import Path
 import os
-from datetime import timedelta # Importuj timedelta
+from datetime import timedelta
 
+# Ścieżka bazowa projektu
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# KLUCZ TAJNY - W produkcji powinien być pobierany ze zmiennych środowiskowych
 SECRET_KEY = 'django-insecure-your-secret-key-change-in-production'
 
-DEBUG = True
+# DEBUG ustawiony na False w produkcji
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+# Konfiguracja hostów i zaufanych źródeł dla Cloudflare
+ALLOWED_HOSTS = ['higlander.zipit.pl', 'localhost', '127.0.0.1', 'backend']
+
+# Rozwiązanie błędu 403 Forbidden przy pracy przez tunel
+CSRF_TRUSTED_ORIGINS = ['https://higlander.zipit.pl']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -19,20 +26,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third party
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
-    'django_filters', # Upewnij się, że to jest (było z ETAP 1)
-    
+    'django_filters',
+
     # Local apps
     'cows',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware', 
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -61,6 +68,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'highlander_farm.wsgi.application'
 
+# Baza danych - SQLite (zgodnie z Twoją konfiguracją)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -88,29 +96,29 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True 
+# Konfiguracja CORS pod domenę
+CORS_ALLOWED_ORIGINS = [
+    "https://higlander.zipit.pl",
+]
 CORS_ALLOW_CREDENTIALS = True
 
-# === ZMIANY W REST_FRAMEWORK ===
+# === REST_FRAMEWORK ===
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # Ustaw JWT jako domyślną metodę uwierzytelniania
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
-        # Wymagaj bycia zalogowanym dla WSZYSTKICH endpointów domyślnie
-        'rest_framework.permissions.IsAuthenticated', 
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 50,
 }
 
-# === NOWA KONFIGURACJA SIMPLEJWT ===
+# === SIMPLEJWT ===
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60), # Token ważny 1h
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),    # Odświeżenie tokena ważne 7 dni
-    
-    "AUTH_HEADER_TYPES": ("Bearer",), # Oczekujemy nagłówka: "Bearer <token>"
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
