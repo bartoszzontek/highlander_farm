@@ -13,11 +13,18 @@ SECRET_KEY = 'django-insecure-your-secret-key-change-in-production'
 # DEBUG ustawiony na False w produkcji
 DEBUG = False
 
-# Konfiguracja hostów i zaufanych źródeł dla Cloudflare
-ALLOWED_HOSTS = ['highlander.zipit.pl', 'localhost', '127.0.0.1', 'backend']
+# Konfiguracja hostów - '*' rozwiązuje problem Bad Request (400) przy tunelach
+ALLOWED_HOSTS = ['*']
 
-# Rozwiązanie błędu 403 Forbidden przy pracy przez tunel
-CSRF_TRUSTED_ORIGINS = ['https://highlander.zipit.pl']
+# Zaufane źródła dla Cloudflare
+CSRF_TRUSTED_ORIGINS = [
+    'https://highlander.zipit.pl',
+    'https://higlander.zipit.pl'
+]
+
+# Konfiguracja proxy - niezbędna do poprawnego działania za Nginksem/Cloudflare
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -68,7 +75,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'highlander_farm.wsgi.application'
 
-# Baza danych - SQLite (zgodnie z Twoją konfiguracją)
+# Baza danych - SQLite
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -96,8 +103,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Konfiguracja CORS pod domenę
+# Konfiguracja CORS
 CORS_ALLOWED_ORIGINS = [
+    "https://highlander.zipit.pl",
     "https://higlander.zipit.pl",
 ]
 CORS_ALLOW_CREDENTIALS = True
