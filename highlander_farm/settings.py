@@ -14,10 +14,10 @@ SECRET_KEY = 'django-insecure-your-secret-key-change-in-production'
 DEBUG = False
 
 # Konfiguracja hostów i zaufanych źródeł dla Cloudflare
-ALLOWED_HOSTS = ['higlander.zipit.pl', 'localhost', '127.0.0.1', 'backend']
+ALLOWED_HOSTS = ['highlander.zipit.pl', 'localhost', '127.0.0.1', 'backend']
 
 # Rozwiązanie błędu 403 Forbidden przy pracy przez tunel
-CSRF_TRUSTED_ORIGINS = ['https://higlander.zipit.pl']
+CSRF_TRUSTED_ORIGINS = ['https://highlander.zipit.pl']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
