@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=highlander
+      - POSTGRES_USER=highlander_user
+      - POSTGRES_PASSWORD=twoje_haslo_db
+
+  backend:
+    build: .
+    volumes:
+      - ./media:/app/media
+    environment:
+      - DATABASE_URL=postgres://highlander_user:twoje_haslo_db@db:5432/highlander
+      - ALLOWED_HOSTS=higlander.zipit.pl,backend
+    depends_on:
+      - db
+
+  frontend:
+    build: ./highlander-frontend
+    depends_on:
+      - backend
+
+  # TWÓJ NOWY TUNEL DLA TEJ KONKRETNEJ APLIKACJI
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run --token eyJhIjoiZTg4N2JmMTY2N2JjOTk1MDUwNWUyNDdlZGIzMjIzYWMiLCJ0IjoiZTcxZWUzMDAtMTZiZS00MGZmLTg2ZTMtN2I2YzRiMDEwNzExIiwicyI6Ik5EUTRZemRsT1dFdE16ZGlaaTAwWXpJeUxXSmhaVFF0WmpRNFl6STNaVEpoTm1ZeiJ9
+    restart: always
+
+volumes:
+  postgres_data:
